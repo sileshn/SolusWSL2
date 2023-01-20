@@ -112,8 +112,6 @@ getent passwd live >/dev/null && (userdel live && rm -rf /home/live)
 sudo sed -i 's/GROUP=1000/GROUP=users/g' /etc/default/useradd
 sudo sed -i 's/CREATE_MAIL_SPOOL=yes/CREATE_MAIL_SPOOL=no/g' /etc/default/useradd
 sudo setcap cap_net_raw+ep /usr/bin/ping
-sudo systemctl daemon-reload
-sudo systemctl enable wslg-init.service >/dev/null 2>&1
 
 echo -e ${grn}"Create root password"${txtrst}
 passwd
@@ -151,6 +149,8 @@ select yn in "Yes" "No"; do
                     if echo $(wsl.exe --version | tr -d '\0' | sed -n 1p | cut -f3 -d " " | cut -f1 -d ".") >0 || echo $(wsl.exe --version | tr -d '\0' | sed -n 1p | cut -f3 -d " " | cut -f2 -d ".") >0 || (($(echo $(wsl.exe --version | tr -d '\0' | sed -n 1p | cut -f3 -d " " | cut -f2-3 -d ".") '>' 67.5 | bc))); then
                         commandline="systemd=true"
                         echo "$commandline" >>/etc/wsl.conf
+						rm /usr/bin/wslg-init.sh
+						rm /usr/lib/systemd/system/wslg-init.service
                     else
                         commandline="command = \"/usr/bin/env -i /usr/bin/unshare --fork --mount --propagation shared --mount-proc --pid -- sh -c 'mount -t binfmt_misc binfmt_misc /proc/sys/fs/binfmt_misc; [ -x /usr/lib/systemd/systemd ] && exec /usr/lib/systemd/systemd --unit=multi-user.target || exec /lib/systemd/systemd --unit=multi-user.target'\""
                         echo "$commandline" >>/etc/wsl.conf
@@ -158,6 +158,8 @@ select yn in "Yes" "No"; do
                         sed -i 's/%sudo/%wheel/g' /etc/sudoers.d/wsl2-systemd
                         wget https://raw.githubusercontent.com/diddledani/one-script-wsl2-systemd/4dc64fba72251f1d9804ec64718bb005e6b27b62/src/00-wsl2-systemd.sh -P /etc/profile.d/
                         sed -i '/\\nSystemd/d' /etc/profile.d/00-wsl2-systemd.sh
+						sudo systemctl daemon-reload
+						sudo systemctl enable wslg-init.service >/dev/null 2>&1
                     fi
 
                     secs=3
@@ -182,6 +184,8 @@ done
 if echo $(wsl.exe --version | tr -d '\0' | sed -n 1p | cut -f3 -d " " | cut -f1 -d ".") >0 || echo $(wsl.exe --version | tr -d '\0' | sed -n 1p | cut -f3 -d " " | cut -f2 -d ".") >0 || (($(echo $(wsl.exe --version | tr -d '\0' | sed -n 1p | cut -f3 -d " " | cut -f2-3 -d ".") '>' 67.5 | bc))); then
     commandline="systemd=true"
     echo "$commandline" >>/etc/wsl.conf
+	rm /usr/bin/wslg-init.sh
+	rm /usr/lib/systemd/system/wslg-init.service
 else
     commandline="command = \"/usr/bin/env -i /usr/bin/unshare --fork --mount --propagation shared --mount-proc --pid -- sh -c 'mount -t binfmt_misc binfmt_misc /proc/sys/fs/binfmt_misc; [ -x /usr/lib/systemd/systemd ] && exec /usr/lib/systemd/systemd --unit=multi-user.target || exec /lib/systemd/systemd --unit=multi-user.target'\""
     echo "$commandline" >>/etc/wsl.conf
@@ -189,6 +193,8 @@ else
     sed -i 's/%sudo/%wheel/g' /etc/sudoers.d/wsl2-systemd
     wget https://raw.githubusercontent.com/diddledani/one-script-wsl2-systemd/4dc64fba72251f1d9804ec64718bb005e6b27b62/src/00-wsl2-systemd.sh -P /etc/profile.d/
     sed -i '/\\nSystemd/d' /etc/profile.d/00-wsl2-systemd.sh
+	sudo systemctl daemon-reload
+	sudo systemctl enable wslg-init.service >/dev/null 2>&1
 fi
 
 echo "@echo off" | sudo tee -a ~/shutdown.cmd >/dev/null 2>&1
