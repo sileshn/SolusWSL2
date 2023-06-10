@@ -109,8 +109,7 @@ if [ "$disksize" -le 274877906944 ]; then
 fi
 
 getent passwd live >/dev/null && (userdel live && rm -rf /home/live)
-sudo sed -i 's/GROUP=1000/GROUP=users/g' /etc/default/useradd
-sudo sed -i 's/CREATE_MAIL_SPOOL=yes/CREATE_MAIL_SPOOL=no/g' /etc/default/useradd
+[ -f /etc/default/useradd ] && (sudo sed -i 's/GROUP=1000/GROUP=users/g' && sudo sed -i 's/CREATE_MAIL_SPOOL=yes/CREATE_MAIL_SPOOL=no/g' /etc/default/useradd)
 sudo setcap cap_net_raw+ep /usr/bin/ping
 
 echo -e ${grn}"Create root password"${txtrst}
